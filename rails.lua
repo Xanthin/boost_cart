@@ -30,7 +30,6 @@ else
 		walkable = false,
 		selection_box = {
 			type = "fixed",
-			-- but how to specify the dimensions for curved and sideways rails?
 			fixed = {-1/2, -1/2, -1/2, 1/2, -1/2+1/16, 1/2},
 		},
 		groups = {dig_immediate = 2, attached_node = 1, rail = 1, connect_to_raillike = 1},
@@ -59,7 +58,6 @@ minetest.register_node(":carts:powerrail", {
 	walkable = false,
 	selection_box = {
 		type = "fixed",
-		-- but how to specify the dimensions for curved and sideways rails?
 		fixed = {-1/2, -1/2, -1/2, 1/2, -1/2+1/16, 1/2},
 	},
 	groups = {dig_immediate = 2, attached_node = 1, rail = 1, connect_to_raillike = 1},
@@ -103,7 +101,6 @@ minetest.register_node(":carts:brakerail", {
 	walkable = false,
 	selection_box = {
 		type = "fixed",
-		-- but how to specify the dimensions for curved and sideways rails?
 		fixed = {-1/2, -1/2, -1/2, 1/2, -1/2+1/16, 1/2},
 	},
 	groups = {dig_immediate = 2, attached_node = 1, rail = 1, connect_to_raillike = 1},

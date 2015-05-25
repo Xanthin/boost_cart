@@ -1,6 +1,3 @@
--- TODO:
---  Add a todo list
-
 boost_cart = {}
 boost_cart.modpath = minetest.get_modpath("boost_cart")
 boost_cart.speed_max = 10
@@ -23,7 +20,6 @@ boost_cart.cart = {
 	mesh = "cart.x",
 	visual_size = {x=1, y=1},
 	textures = {"cart.png"},
-	
 	driver = nil,
 	punched = false, -- used to re-send velocity and position
 	velocity = {x=0, y=0, z=0}, -- only used on punch

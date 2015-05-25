@@ -141,9 +141,9 @@ end
 function boost_cart:boost_rail(pos, amount)
 	minetest.get_meta(pos):set_string("cart_acceleration", tostring(amount))
 	for _,obj_ in ipairs(minetest.get_objects_inside_radius(pos, 0.5)) do
-		if not obj_:is_player() and
-				obj_:get_luaentity() and
-				obj_:get_luaentity().name == "carts:cart" then
+		if not obj_:is_player()
+		and obj_:get_luaentity()
+		and obj_:get_luaentity().name == "carts:cart" then
 			obj_:get_luaentity():on_punch()
 		end
 	end
