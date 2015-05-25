@@ -118,10 +118,10 @@ end
 
 function boost_cart.cart:on_step(dtime)
 
-	self.count = (self.count or 0) + 1
+	self.count = (self.count or 0) + dtime
 
 	-- no driver inside
-	if self.count > 100 and not self.driver then
+	if self.count > 10 and not self.driver then
 		minetest.add_item(self.object:getpos(), "carts:cart")
 		self.object:remove()
 
