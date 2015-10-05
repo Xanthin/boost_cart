@@ -13,6 +13,11 @@ end
 dofile(boost_cart.modpath.."/functions.lua")
 dofile(boost_cart.modpath.."/rails.lua")
 
+-- Support for non-default games
+if not default.player_attached then
+	default.player_attached = {}
+end
+
 boost_cart.cart = {
 	physical = false,
 	collisionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
@@ -46,6 +51,10 @@ function boost_cart.cart:on_rightclick(clicker)
 end
 
 function boost_cart.cart:on_activate(staticdata, dtime_s)
+if mobs and mobs.entity and mobs.entity == false then
+	self.object:remove()
+	return
+end
 	self.object:set_armor_groups({immortal=1})
 	self.driver = nil
 end
@@ -84,9 +93,15 @@ function boost_cart.cart:on_punch(puncher, time_from_last_punch, tool_capabiliti
 				obj_:set_detach()
 			end
 		end
-		
+
+		local inv = puncher:get_inventory()
+		if inv:room_for_item("main", "carts:cart") then
+			inv:add_item("main", "carts:cart")
+		else
+			minetest.add_item(self.object:getpos(), "carts:cart")
+		end
+
 		self.object:remove()
-		puncher:get_inventory():add_item("main", "carts:cart")
 		return
 	end
 	
@@ -120,6 +135,7 @@ function boost_cart.cart:on_step(dtime)
 	if self.count > 10 and not self.driver then
 		minetest.add_item(self.object:getpos(), "carts:cart")
 		self.object:remove()
+		return
 
 	-- driver inside
 	elseif self.driver then
