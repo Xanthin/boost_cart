@@ -51,12 +51,15 @@ function boost_cart.cart:on_rightclick(clicker)
 end
 
 function boost_cart.cart:on_activate(staticdata, dtime_s)
-if mobs and mobs.entity and mobs.entity == false then
-	self.object:remove()
-	return
-end
+
+	if mobs and mobs.entity and mobs.entity == false then
+		self.object:remove()
+		return
+	end
+
 	self.object:set_armor_groups({immortal=1})
 	self.driver = nil
+	self.count = 0
 end
 
 function boost_cart.cart:on_punch(puncher, time_from_last_punch, tool_capabilities, direction)
@@ -129,7 +132,7 @@ end
 
 function boost_cart.cart:on_step(dtime)
 
-	self.count = (self.count or 0) + dtime
+	self.count = self.count + dtime
 
 	-- no driver inside
 	if self.count > 10 and not self.driver then
