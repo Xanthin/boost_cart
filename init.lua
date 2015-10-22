@@ -182,7 +182,6 @@ end
 if (vv < 1 or not self.driver) and self.snd == 1 then
 
 	if self.handle then
-		print ("handle", self.handle)
 		minetest.sound_stop(self.handle)
 		self.handle = nil
 		self.snd = 0
