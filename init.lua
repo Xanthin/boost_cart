@@ -32,8 +32,12 @@ boost_cart.cart = {
 	old_pos = nil,
 	old_switch = 0,
 	railtype = nil,
-	attached_items = {}
+	attached_items = {},
 }
+
+local function get_v(v)
+	return math.sqrt(v.x ^ 2 + v.z ^ 2)
+end
 
 function boost_cart.cart:on_rightclick(clicker)
 	if not clicker or not clicker:is_player() then
@@ -60,6 +64,8 @@ function boost_cart.cart:on_activate(staticdata, dtime_s)
 	self.object:set_armor_groups({immortal=1})
 	self.driver = nil
 	self.count = 0
+	self.snd = 0
+	self.handle = nil
 end
 
 function boost_cart.cart:on_punch(puncher, time_from_last_punch, tool_capabilities, direction)
@@ -85,6 +91,13 @@ function boost_cart.cart:on_punch(puncher, time_from_last_punch, tool_capabiliti
 			if self.old_pos then
 				self.object:setpos(self.old_pos)
 			end
+
+if self.handle then
+	minetest.sound_stop(self.handle)
+	self.handle = nil
+	self.snd = 0
+end
+
 			default.player_attached[self.driver] = nil
 			local player = minetest.get_player_by_name(self.driver)
 			if player then
@@ -150,6 +163,33 @@ function boost_cart.cart:on_step(dtime)
 	end
 
 	local vel = self.object:getvelocity()
+
+local vv = get_v(vel) ; --print ("vel", vv, self.driver)
+if vv > 1 and self.driver and self.snd == 0 then
+
+	self.handle = minetest.sound_play("cart_ride", {
+		-- to_player = self.player,
+		object = self.object,
+		gain = 1.0,
+		loop = true,
+	})
+	if self.handle then
+		self.snd = 1
+	end
+
+end
+
+if (vv < 1 or not self.driver) and self.snd == 1 then
+
+	if self.handle then
+		print ("handle", self.handle)
+		minetest.sound_stop(self.handle)
+		self.handle = nil
+		self.snd = 0
+	end
+
+end
+
 	if self.punched then
 		vel = vector.add(vel, self.velocity)
 		self.object:setvelocity(vel)
