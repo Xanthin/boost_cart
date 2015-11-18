@@ -266,7 +266,7 @@ end
 		-- Up, down?
 		if dir.y ~= self.old_dir.y then
 			vel.y = dir.y * math.abs(vel.x + vel.z)
-			pos = vector.round(pos)
+			--pos = vector.round(pos)
 			update.pos = true
 		end
 		
