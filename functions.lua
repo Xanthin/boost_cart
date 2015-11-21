@@ -64,8 +64,7 @@ function boost_cart:check_front_up_down(pos, dir_, check_down, railtype)
 end
 
 function boost_cart:get_rail_direction(pos_, dir, ctrl, old_switch, railtype)
-	--local pos = vector.round(pos_)
-	local pos = pos_
+	local pos = vector.round(pos_)
 	local cur = nil
 	local left_check, right_check = true, true
 	
