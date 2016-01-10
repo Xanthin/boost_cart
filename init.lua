@@ -35,15 +35,22 @@ boost_cart.cart = {
 	attached_items = {},
 }
 
+local square = math.sqrt
+local pi = math.pi
+
 local function get_v(v)
-	return math.sqrt(v.x ^ 2 + v.z ^ 2)
+
+	return square(v.x * v.x + v.z * v.z)
 end
 
 function boost_cart.cart:on_rightclick(clicker)
+
 	if not clicker or not clicker:is_player() then
 		return
 	end
+
 	local player_name = clicker:get_player_name()
+
 	if self.driver and player_name == self.driver then
 		self.driver = nil
 		clicker:set_detach()
@@ -69,48 +76,61 @@ function boost_cart.cart:on_activate(staticdata, dtime_s)
 end
 
 function boost_cart.cart:on_punch(puncher, time_from_last_punch, tool_capabilities, direction)
+
 	local pos = self.object:getpos()
+
 	if not self.railtype then
 		local node = minetest.get_node(vector.floor(pos)).name
 		self.railtype = minetest.get_item_group(node, "connect_to_raillike")
 	end
 	
 	if not puncher or not puncher:is_player() then
+
 		local cart_dir = boost_cart:get_rail_direction(pos, {x=1, y=0, z=0}, nil, nil, self.railtype)
+
 		if vector.equals(cart_dir, {x=0, y=0, z=0}) then
 			return
 		end
+
 		self.velocity = vector.multiply(cart_dir, 3)
 		self.old_pos = nil
 		self.punched = true
+
 		return
 	end
 
 	if puncher:get_player_control().sneak then
+
 		if self.driver then
+
 			if self.old_pos then
 				self.object:setpos(self.old_pos)
 			end
 
-if self.handle then
-	minetest.sound_stop(self.handle)
-	self.handle = nil
-	self.snd = 0
-end
+			if self.handle then
+				minetest.sound_stop(self.handle)
+				self.handle = nil
+				self.snd = 0
+			end
 
 			default.player_attached[self.driver] = nil
+
 			local player = minetest.get_player_by_name(self.driver)
+
 			if player then
 				player:set_detach()
 			end
 		end
-		for _,obj_ in ipairs(self.attached_items) do
+
+		for _,obj_ in pairs(self.attached_items) do
+
 			if obj_ then
 				obj_:set_detach()
 			end
 		end
 
 		local inv = puncher:get_inventory()
+
 		if inv:room_for_item("main", "carts:cart") then
 			inv:add_item("main", "carts:cart")
 		else
@@ -118,11 +138,14 @@ end
 		end
 
 		self.object:remove()
+
 		return
 	end
 	
 	local vel = self.object:getvelocity()
+
 	if puncher:get_player_name() == self.driver then
+
 		if math.abs(vel.x + vel.z) > 7 then
 			return
 		end
@@ -130,12 +153,15 @@ end
 	
 	local punch_dir = boost_cart:velocity_to_dir(puncher:get_look_dir())
 	punch_dir.y = 0
+
 	local cart_dir = boost_cart:get_rail_direction(pos, punch_dir, nil, nil, self.railtype)
+
 	if vector.equals(cart_dir, {x=0, y=0, z=0}) then
 		return
 	end
 	
 	time_from_last_punch = math.min(time_from_last_punch, tool_capabilities.full_punch_interval)
+
 	local f = 3 * (time_from_last_punch / tool_capabilities.full_punch_interval)
 	
 	self.velocity = vector.multiply(cart_dir, f)
@@ -149,8 +175,11 @@ function boost_cart.cart:on_step(dtime)
 
 	-- no driver inside
 	if self.count > 10 and not self.driver then
+
 		minetest.add_item(self.object:getpos(), "carts:cart")
+
 		self.object:remove()
+
 		return
 
 	-- driver inside
@@ -164,43 +193,48 @@ function boost_cart.cart:on_step(dtime)
 
 	local vel = self.object:getvelocity()
 
-local vv = get_v(vel) ; --print ("vel", vv, self.driver)
-if vv > 1 and self.driver and self.snd == 0 then
+	local vv = get_v(vel) ; --print ("vel", vv, self.driver)
+	if vv > 1 and self.driver and self.snd == 0 then
 
-	self.handle = minetest.sound_play("cart_ride", {
-		-- to_player = self.player,
-		object = self.object,
-		gain = 1.0,
-		loop = true,
-	})
-	if self.handle then
-		self.snd = 1
+		self.handle = minetest.sound_play("cart_ride", {
+			-- to_player = self.player,
+			object = self.object,
+			gain = 1.0,
+			loop = true,
+		})
+
+		if self.handle then
+			self.snd = 1
+		end
 	end
 
-end
+	if (vv < 1 or not self.driver) and self.snd == 1 then
 
-if (vv < 1 or not self.driver) and self.snd == 1 then
-
-	if self.handle then
-		minetest.sound_stop(self.handle)
-		self.handle = nil
-		self.snd = 0
+		if self.handle then
+			minetest.sound_stop(self.handle)
+			self.handle = nil
+			self.snd = 0
+		end
 	end
-
-end
 
 	if self.punched then
+
 		vel = vector.add(vel, self.velocity)
 		self.object:setvelocity(vel)
+
 	elseif vector.equals(vel, {x=0, y=0, z=0}) then
+
 		return
 	end
 	
 	local dir, last_switch = nil, nil
 	local pos = self.object:getpos()
+
 	if self.old_pos and not self.punched then
+
 		local flo_pos = vector.floor(pos)
 		local flo_old = vector.floor(self.old_pos)
+
 		if vector.equals(flo_pos, flo_old) then
 			return
 		end
@@ -208,30 +242,43 @@ end
 	
 	local update = {}
 	local ctrl, player = nil, nil
+
 	if self.driver then
+
 		player = minetest.get_player_by_name(self.driver)
+
 		if player then
 			ctrl = player:get_player_control()
 		end
 	end
+
 	if self.old_pos then
+
 		local diff = vector.subtract(self.old_pos, pos)
-		for _,v in ipairs({"x","y","z"}) do
+
+		for _,v in pairs({"x","y","z"}) do
+
 			if math.abs(diff[v]) > 1.1 then
+
 				local expected_pos = vector.add(self.old_pos, self.old_dir)
+
 				dir, last_switch = boost_cart:get_rail_direction(pos, self.old_dir, ctrl, self.old_switch, self.railtype)
+
 				if vector.equals(dir, {x=0, y=0, z=0}) then
 					dir = false
 					pos = vector.new(expected_pos)
 					update.pos = true
 				end
+
 				break
 			end
 		end
 	end
 	
 	if vel.y == 0 then
-		for _,v in ipairs({"x", "z"}) do
+
+		for _,v in pairs({"x", "z"}) do
+
 			if vel[v] ~= 0 and math.abs(vel[v]) < 0.9 then
 				vel[v] = 0
 				update.vel = true
@@ -241,11 +288,13 @@ end
 	
 	local cart_dir = boost_cart:velocity_to_dir(vel)
 	local max_vel = boost_cart.speed_max
+
 	if not dir then
 		dir, last_switch = boost_cart:get_rail_direction(pos, cart_dir, ctrl, self.old_switch, self.railtype)
 	end
 	
 	local new_acc = {x=0, y=0, z=0}
+
 	if vector.equals(dir, {x=0, y=0, z=0}) then
 		vel = {x=0, y=0, z=0}
 		update.vel = true
@@ -257,12 +306,14 @@ end
 			pos.z = math.floor(pos.z + 0.5)
 			update.pos = true
 		end
+
 		if dir.z ~= 0 and self.old_dir.x ~= 0 then
 			vel.z = dir.z * math.abs(vel.x)
 			vel.x = 0
 			pos.x = math.floor(pos.x + 0.5)
 			update.pos = true
 		end
+
 		-- Up, down?
 		if dir.y ~= self.old_dir.y then
 			vel.y = dir.y * math.abs(vel.x + vel.z)
@@ -274,18 +325,25 @@ end
 		local acc = dir.y * -1.8
 		
 		local speed_mod = tonumber(minetest.get_meta(pos):get_string("cart_acceleration"))
+
 		if speed_mod and speed_mod ~= 0 then
+
 			if speed_mod > 0 then
-				for _,v in ipairs({"x","y","z"}) do
+
+				for _,v in pairs({"x","y","z"}) do
+
 					if math.abs(vel[v]) >= max_vel then
 						speed_mod = 0
 						break
 					end
 				end
 			end
+
 			acc = acc + (speed_mod * 8)
+
 		else
 			acc = acc - 0.4
+
 			-- Handbrake
 			if ctrl and ctrl.down and math.abs(vel.x + vel.z) > 1.2 then
 				acc = acc - 1.2
@@ -301,7 +359,8 @@ end
 	self.old_switch = last_switch
 	
 	-- Limits
-	for _,v in ipairs({"x","y","z"}) do
+	for _,v in pairs({"x","y","z"}) do
+
 		if math.abs(vel[v]) > max_vel then
 			vel[v] = boost_cart:get_sign(vel[v]) * max_vel
 			update.vel = true
@@ -309,16 +368,21 @@ end
 	end
 	
 	if self.punched then
+
 		-- Collect dropped items
-		for _,obj_ in ipairs(minetest.get_objects_inside_radius(pos, 1)) do
-			if not obj_:is_player() and
-					obj_:get_luaentity() and
-					not obj_:get_luaentity().physical_state and
-					obj_:get_luaentity().name == "__builtin:item" then
+		for _,obj_ in pairs(minetest.get_objects_inside_radius(pos, 1)) do
+
+			if not obj_:is_player()
+			and obj_:get_luaentity()
+			and not obj_:get_luaentity().physical_state
+			and obj_:get_luaentity().name == "__builtin:item" then
+
 				obj_:set_attach(self.object, "", {x=0, y=0, z=0}, {x=0, y=0, z=0})
+
 				self.attached_items[#self.attached_items + 1] = obj_
 			end
 		end
+
 		self.punched = false
 	end
 	
@@ -327,6 +391,7 @@ end
 	end
 	
 	local yaw = 0
+
 	if dir.x < 0 then
 		yaw = 0.5
 	elseif dir.x > 0 then
@@ -334,32 +399,41 @@ end
 	elseif dir.z < 0 then
 		yaw = 1
 	end
-	self.object:setyaw(yaw * math.pi)
+
+	self.object:setyaw(yaw * pi)
 	
 	local anim = {x=0, y=0}
+
 	if dir.y == -1 then
 		anim = {x=1, y=1}
 	elseif dir.y == 1 then
 		anim = {x=2, y=2}
 	end
+
 	self.object:set_animation(anim, 1, 0)
 	
 	self.object:setvelocity(vel)
+
 	if update.pos then
 		self.object:setpos(pos)
 	end
+
 	update = nil
 end
 
 minetest.register_entity(":carts:cart", boost_cart.cart)
+
 minetest.register_craftitem(":carts:cart", {
 	description = "Cart",
 	inventory_image = minetest.inventorycube("cart_top.png", "cart_side.png", "cart_side.png"),
 	wield_image = "cart_side.png",
+
 	on_place = function(itemstack, placer, pointed_thing)
+
 		if not pointed_thing.type == "node" then
 			return
 		end
+
 		if boost_cart:is_rail(pointed_thing.under) then
 			minetest.add_entity(pointed_thing.under, "carts:cart")
 		elseif boost_cart:is_rail(pointed_thing.above) then
@@ -367,6 +441,7 @@ minetest.register_craftitem(":carts:cart", {
 		else return end
 		
 		itemstack:take_item()
+
 		return itemstack
 	end,
 })
@@ -378,3 +453,5 @@ minetest.register_craft({
 		{"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
 	},
 })
+
+print ("[MOD] Boost Cart loaded")
