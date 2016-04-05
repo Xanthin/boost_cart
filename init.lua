@@ -159,8 +159,8 @@ function boost_cart.cart:on_punch(puncher, time_from_last_punch, tool_capabiliti
 	if vector.equals(cart_dir, {x=0, y=0, z=0}) then
 		return
 	end
-	
-	time_from_last_punch = math.min(time_from_last_punch, tool_capabilities.full_punch_interval)
+
+	time_from_last_punch = math.min(time_from_last_punch, tool_capabilities.full_punch_interval) or 1.4
 
 	local f = 3 * (time_from_last_punch / tool_capabilities.full_punch_interval)
 	
@@ -221,7 +221,7 @@ function boost_cart.cart:on_step(dtime)
 
 		vel = vector.add(vel, self.velocity)
 		self.object:setvelocity(vel)
-
+self.old_dir.y = 0 -- ADDED
 	elseif vector.equals(vel, {x=0, y=0, z=0}) then
 
 		return

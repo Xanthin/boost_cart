@@ -48,7 +48,7 @@ function boost_cart:check_front_up_down(pos, dir_, check_down, railtype)
 
 	local dir = vector.new(dir_)
 	local cur = nil
-	
+
 	-- Front
 	dir.y = 0
 	cur = vector.add(pos, dir)
